@@ -57,6 +57,12 @@ EXAMPLE_PROMPT = {
             'examples/girl.png,examples/snake.png',
         "prompt":
             "在一个欢乐而充满节日气氛的场景中，穿着鲜艳红色春服的小女孩正与她的可爱卡通蛇嬉戏。她的春服上绣着金色吉祥图案，散发着喜庆的气息，脸上洋溢着灿烂的笑容。蛇身呈现出亮眼的绿色，形状圆润，宽大的眼睛让它显得既友善又幽默。小女孩欢快地用手轻轻抚摸着蛇的头部，共同享受着这温馨的时刻。周围五彩斑斓的灯笼和彩带装饰着环境，阳光透过洒在她们身上，营造出一个充满友爱与幸福的新年氛围。"
+    },
+    "grok-i2v": {
+        "prompt":
+            "Transform this image into a dynamic video with smooth motion and cinematic quality. The scene should come to life with natural movements.",
+        "image":
+            "examples/i2v_input.JPG",
     }
 }
 
@@ -430,6 +436,35 @@ def generate(args):
             args.prompt,
             img,
             max_area=MAX_AREA_CONFIGS[args.size],
+            frame_num=args.frame_num,
+            shift=args.sample_shift,
+            sample_solver=args.sample_solver,
+            sampling_steps=args.sample_steps,
+            guide_scale=args.sample_guide_scale,
+            seed=args.base_seed,
+            offload_model=args.offload_model)
+    elif "grok-i2v" in args.task:
+        # Grok API-based Image-to-Video generation
+        if args.prompt is None:
+            args.prompt = EXAMPLE_PROMPT[args.task]["prompt"]
+        if args.image is None:
+            args.image = EXAMPLE_PROMPT[args.task]["image"]
+        logging.info(f"Input prompt: {args.prompt}")
+        logging.info(f"Input image: {args.image}")
+        
+        img = Image.open(args.image).convert("RGB")
+        
+        logging.info("Creating Grok I2V pipeline.")
+        grok_i2v = wan.GrokI2V(
+            device_id=device,
+            rank=rank,
+        )
+        
+        logging.info("Generating video with Grok API ...")
+        video = grok_i2v.generate(
+            args.prompt,
+            img,
+            max_area=MAX_AREA_CONFIGS.get(args.size),
             frame_num=args.frame_num,
             shift=args.sample_shift,
             sample_solver=args.sample_solver,

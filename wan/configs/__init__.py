@@ -17,6 +17,10 @@ flf2v_14B = copy.deepcopy(i2v_14B)
 flf2v_14B.__name__ = 'Config: Wan FLF2V 14B'
 flf2v_14B.sample_neg_prompt = "镜头切换，" + flf2v_14B.sample_neg_prompt
 
+# the config of grok-i2v uses i2v_14B as base (for compatibility)
+grok_i2v = copy.deepcopy(i2v_14B)
+grok_i2v.__name__ = 'Config: Grok I2V'
+
 WAN_CONFIGS = {
     't2v-14B': t2v_14B,
     't2v-1.3B': t2v_1_3B,
@@ -25,6 +29,7 @@ WAN_CONFIGS = {
     'flf2v-14B': flf2v_14B,
     'vace-1.3B': t2v_1_3B,
     'vace-14B': t2v_14B,
+    'grok-i2v': grok_i2v,
 }
 
 SIZE_CONFIGS = {
@@ -49,5 +54,6 @@ SUPPORTED_SIZES = {
     'flf2v-14B': ('720*1280', '1280*720', '480*832', '832*480'),
     't2i-14B': tuple(SIZE_CONFIGS.keys()),
     'vace-1.3B': ('480*832', '832*480'),
-    'vace-14B': ('720*1280', '1280*720', '480*832', '832*480')
+    'vace-14B': ('720*1280', '1280*720', '480*832', '832*480'),
+    'grok-i2v': ('720*1280', '1280*720', '480*832', '832*480'),
 }
