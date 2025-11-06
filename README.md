@@ -95,6 +95,8 @@ pip install -r requirements.txt
 
 #### Grok API Integration (Alternative to WAN Model)
 
+**⚠️ Note:** This is a template implementation. Please verify against [xAI's official API documentation](https://docs.x.ai/docs/overview) before production use.
+
 **Wan2.1** now supports using the xAI Grok API for image-to-video generation as an alternative to the local WAN model. This provides a cloud-based option that doesn't require local GPU resources.
 
 To use the Grok API:

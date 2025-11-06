@@ -2,6 +2,20 @@
 
 This integration adds support for using xAI's Grok API to generate videos from images, replacing the WAN model for image-to-video tasks.
 
+## ⚠️ Important Disclaimer
+
+**This integration is a template/framework implementation.** The actual xAI Grok API endpoints and structure for image-to-video generation may differ from this implementation. 
+
+**Before using in production:**
+
+1. ✅ Verify the actual Grok API endpoint for image-to-video generation with [xAI's official documentation](https://docs.x.ai/docs/overview)
+2. ✅ Update the request payload structure in `wan/grok_i2v.py` to match official specs
+3. ✅ Adjust response parsing logic based on actual API response format
+4. ✅ Test thoroughly with real API credentials
+5. ✅ Monitor for API changes and updates from xAI
+
+This code serves as a starting point and may require adjustments based on the official API specification. The interface is designed to be easily adaptable once full API details are available.
+
 ## Overview
 
 The Grok API integration (`grok-i2v`) allows you to leverage xAI's Grok model for image-to-video generation through a simple API interface. This provides an alternative to the local WAN model, with the following benefits:
@@ -140,9 +154,50 @@ If the generated video quality doesn't meet expectations:
 - Provide more detailed prompts
 - Experiment with different seeds using `--base_seed`
 
+### API Structure Mismatch
+
+If you encounter errors like "No video URL found in API response" or HTTP 400/404 errors:
+
+This likely means the API structure has changed or differs from the template implementation. To fix:
+
+1. Check the [official xAI API documentation](https://docs.x.ai/docs/overview)
+2. Update the endpoint URL in `wan/grok_i2v.py` (line ~189)
+3. Adjust the request payload structure (lines ~155-178)
+4. Modify the response parsing logic in `_extract_video_from_response()` (lines ~218-244)
+
+The code includes detailed comments marking these areas for easy updates.
+
 ## Technical Details
 
-### Implementation
+### Implementation Notes
+
+**This implementation is a template.** Key areas that may need adjustment:
+
+#### 1. API Endpoint (Line ~189 in grok_i2v.py)
+Current: `f"{self.api_url}/chat/completions"`
+
+Possible alternatives based on common API patterns:
+- `f"{self.api_url}/video/generate"`
+- `f"{self.api_url}/v1/images/animate"`
+- `f"{self.api_url}/v1/media/generate"`
+
+#### 2. Request Payload (Lines ~155-178)
+The payload structure is based on common multimodal API patterns. You may need to adjust:
+- Parameter names (e.g., `video_config` might be `video_settings`)
+- Structure (flat vs nested parameters)
+- Required vs optional fields
+
+#### 3. Response Format (Lines ~218-244)
+The code attempts to extract video URLs from multiple common response patterns:
+```python
+response['choices'][0]['message']['video_url']
+response['video_url']
+response['data']['url']
+```
+
+Update `_extract_video_from_response()` to match the actual response format.
+
+### Implementation Structure
 
 The Grok I2V integration is implemented in `wan/grok_i2v.py` and provides:
 
@@ -163,7 +218,7 @@ Values are normalized to the range `[-1, 1]`.
 
 ## Known Limitations
 
-1. **API Availability**: The actual Grok image-to-video API endpoint structure may differ from the current implementation. This code serves as a template that may need adjustments based on the official API documentation.
+1. **Template Implementation**: The actual Grok image-to-video API endpoint structure may differ from the current implementation. This code serves as a template that requires verification against official API documentation.
 
 2. **Response Format**: The video extraction logic assumes certain response structures. Adjustments may be needed based on the actual API response format.
 

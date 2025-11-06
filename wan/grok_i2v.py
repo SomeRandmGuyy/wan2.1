@@ -2,6 +2,30 @@
 """
 Grok API integration for Image-to-Video generation.
 This module provides a wrapper around the xAI Grok API for converting images to videos.
+
+IMPORTANT NOTES:
+================
+This implementation serves as a template/framework for integrating with xAI's Grok API.
+The actual API endpoints and request/response structures may differ from what's implemented
+here, as the official Grok image-to-video API documentation was not available at the time
+of implementation.
+
+BEFORE USING IN PRODUCTION:
+===========================
+1. Verify the actual Grok API endpoint for image-to-video generation
+2. Update the payload structure to match the official API specification
+3. Adjust response parsing based on actual API response format
+4. Test with real API credentials and validate all functionality
+5. Implement proper error handling for production use cases
+
+The code structure and interface are designed to be easily adaptable once the official
+API details are available. The main areas that may need adjustment:
+- API endpoint URL (currently using /chat/completions as a placeholder)
+- Request payload structure (currently based on common API patterns)
+- Response parsing logic (currently handles multiple common patterns)
+
+For the latest xAI Grok API documentation, visit:
+https://docs.x.ai/docs/overview
 """
 
 import logging
@@ -129,8 +153,24 @@ class GrokI2V:
             "Content-Type": "application/json",
         }
         
-        # Note: This is a hypothetical API structure based on common patterns
-        # The actual Grok API endpoint for image-to-video may differ
+        # WARNING: This API structure is a template based on common patterns.
+        # The actual xAI Grok API for image-to-video may have a different structure.
+        # Please refer to the official xAI documentation and update accordingly.
+        # 
+        # Common alternative endpoint patterns that might be used:
+        # - f"{self.api_url}/video/generate"
+        # - f"{self.api_url}/v1/images/animate"
+        # - f"{self.api_url}/v1/media/generate"
+        # 
+        # You may need to adjust:
+        # 1. The endpoint URL
+        # 2. The payload structure
+        # 3. The parameter names and values
+        
+        logging.warning(
+            "Using template API structure. Verify against official xAI Grok API documentation."
+        )
+        
         payload = {
             "model": self.model,
             "messages": [
@@ -151,7 +191,7 @@ class GrokI2V:
             "temperature": 0.5,
             "max_tokens": 1000,
             "stream": False,
-            # Video generation specific parameters
+            # Video generation specific parameters - these may need adjustment
             "video_config": {
                 "num_frames": frame_num,
                 "guidance_scale": guide_scale,
@@ -161,15 +201,24 @@ class GrokI2V:
         
         try:
             # Make API request
+            # NOTE: The endpoint may need to be updated based on official API docs
+            endpoint = f"{self.api_url}/chat/completions"
+            logging.info(f"Sending request to: {endpoint}")
+            
             response = requests.post(
-                f"{self.api_url}/chat/completions",
+                endpoint,
                 headers=headers,
                 json=payload,
                 timeout=timeout,
             )
+            
+            # Log response status for debugging
+            logging.info(f"API response status: {response.status_code}")
+            
             response.raise_for_status()
             
             result = response.json()
+            logging.debug(f"API response: {result}")
             
             # Extract video URL or data from response
             # Note: The actual response format will depend on the Grok API
@@ -180,13 +229,31 @@ class GrokI2V:
                 video_tensor = self._download_and_convert_video(video_url, frame_num)
                 return video_tensor
             else:
-                raise ValueError("No video URL found in API response")
+                logging.error(f"Failed to extract video URL from response: {result}")
+                raise ValueError(
+                    "No video URL found in API response. "
+                    "This may indicate that the API structure has changed or "
+                    "the endpoint doesn't support video generation. "
+                    "Please check the official xAI Grok API documentation and "
+                    "update the implementation accordingly."
+                )
                 
+        except requests.exceptions.HTTPError as e:
+            logging.error(f"HTTP error from API: {e}")
+            logging.error(f"Response content: {e.response.text if hasattr(e, 'response') else 'N/A'}")
+            raise RuntimeError(
+                f"API request failed with status {e.response.status_code if hasattr(e, 'response') else 'unknown'}. "
+                f"This may indicate an incorrect endpoint or payload structure. "
+                f"Please verify the API implementation against official documentation."
+            ) from e
         except requests.exceptions.RequestException as e:
-            logging.error(f"API request failed: {e}")
-            raise
+            logging.error(f"Network error during API request: {e}")
+            raise RuntimeError(
+                f"Failed to connect to Grok API: {e}. "
+                f"Please check your internet connection and API endpoint configuration."
+            ) from e
         except Exception as e:
-            logging.error(f"Video generation failed: {e}")
+            logging.error(f"Unexpected error during video generation: {e}")
             raise
 
     def _extract_video_from_response(self, response: dict) -> Optional[str]:
