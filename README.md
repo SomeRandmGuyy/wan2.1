@@ -93,6 +93,25 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+#### Grok API Integration (Alternative to WAN Model)
+
+**Wan2.1** now supports using the xAI Grok API for image-to-video generation as an alternative to the local WAN model. This provides a cloud-based option that doesn't require local GPU resources.
+
+To use the Grok API:
+1. Get your API key from [xAI Console](https://console.x.ai/)
+2. Set the environment variable: `export XAI_API_KEY="your_api_key"`
+3. Use the `--task grok-i2v` option:
+
+```sh
+XAI_API_KEY="your_key" python generate.py \
+  --task grok-i2v \
+  --size 1280*720 \
+  --image examples/i2v_input.JPG \
+  --prompt "Transform this image into a dynamic video"
+```
+
+For detailed documentation on the Grok integration, see [GROK_INTEGRATION.md](GROK_INTEGRATION.md).
+
 
 #### Model Download
 
